@@ -1,8 +1,13 @@
 # Django settings for server project.
 import os
+import pymongo
+import urlparse
 
 SITE_ROOT = os.path.abspath(os.path.join(__file__,'..','..','..'))
 print str.format("Running server from: {0}",SITE_ROOT)
+mongo_db_location = os.environ.get("MONGODB_URL","mongodb://vebsuser:vebsuser@localhost:27017/vebsiam2") 
+mongo_db_url = urlparse.urlparse(mongo_db_location)
+MONGO_DB = pymongo.Connection(mongo_db_location)[mongo_db_url.path.strip('/')]
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
@@ -94,7 +99,7 @@ TEMPLATE_LOADERS = (
 MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
+    # 'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     # Uncomment the next line for simple clickjacking protection:
