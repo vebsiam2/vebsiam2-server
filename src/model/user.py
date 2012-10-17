@@ -7,3 +7,6 @@ class User(model.Base):
     tenant_aware = False
     def __init__(self):
         super(User, self).__init__()
+        
+    def validate(self):
+        model.Base.validate(self)

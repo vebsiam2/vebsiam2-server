@@ -12,7 +12,12 @@ def create(request):
         return HttpResponse("Invalid create request", status=503)
     json_data = simplejson.loads(request.raw_post_data)
     u = User()
-    for name in json_data: 
-        u.name = json_data[name]
+    for name in json_data:
+        # TODO: Add validation of attribute names and values 
+        u.__dict__[name] = json_data[name]
     u.save()
-    return HttpResponse("Hello, World")
+    ret = {
+       'success':True,
+       'id':str(u._id)
+    }
+    return HttpResponse(simplejson.dumps(ret),"application/json")
