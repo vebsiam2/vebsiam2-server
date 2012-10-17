@@ -1,13 +1,24 @@
 from server.settings import MONGO_DB
+import bson
+
+def delete_by_id(id,tenant,basecollection):
+    ''' Helper function to delete any object simply by ID. Note that this is 
+    hard delete, and perhaps we may want to preserve all objects, since we will need history'''
+    _id = bson.objectid.ObjectId(id)
+    if(tenant): col = tenant+"."+basecollection
+    else: col = basecollection 
+    MONGO_DB[col].delete({'_id':_id})
 
 class Base(object):
-    def __init__(self):
+    def __init__(self,param):
         self._id = None
         self._version = None
         pass
     
-    def delete(self):
-        pass
+    def delete(self,tenant=None):
+        if(not self._id):
+            raise ModelError("Can't delete transient object")
+        MONGO_DB[self.collectionName(tenant)].delete({'_id':self._id})
 
     def save(self,tenant=None):
         self.validate()
@@ -25,19 +36,19 @@ class Base(object):
         data["_version"] = self.version
         if(self._id): 
             data["_id"] = self._id
-            
-        # Different tenants will have different collections
-        # This will enable us to have separate schema, index etc
-        if(tenant): 
-            collectionName = tenant+"."+self.collection
-        else: collectionName = self.collection
         
         # Save the data into a collection
-        self._id = MONGO_DB[collectionName].save(data)
+        self._id = MONGO_DB[self.collectionName(tenant)].save(data)
     
     def validate(self):
         pass
+    
+    def collectionName(self,tenant):
+        # Different tenants will have different collections
+        # This will enable us to have separate schema, index etc
+        if(tenant): return tenant+"."+self.collection
+        return self.collection        
 
-class ModelError:
+class ModelError(Exception):
     def __init__(self,error):
         self.error = error
