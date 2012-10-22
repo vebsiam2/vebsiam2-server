@@ -17,6 +17,7 @@ def create(request):
     for name in json_data:
         # TODO: Add validation of attribute names and values 
         u.__dict__[name] = json_data[name]
+        # ashutosh pitre - added as a test ..TODO: Add validation of attribute names and values
     u.save()
     ret = {
        'success':True,
