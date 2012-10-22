@@ -19,7 +19,10 @@ class Base(object):
     def find_by_id(cls, objid, type_coerce=False):
         bsonid = bson.objectid.ObjectId(objid)
         data = MONGO_DB[cls.collectionName()].find_one({'_id':bsonid})
-        
+        return cls.construct_from_data(data, type_coerce)
+    
+    @classmethod
+    def construct_from_data(cls,data,type_coerce=False):
         if(not data): return None
         
         if(data["_type"]!=cls.__name__):
@@ -36,6 +39,11 @@ class Base(object):
         o.__dict__.update(data["object"])
         
         return o
+    
+    @classmethod
+    def find_by_unique_field(cls, field, value, type_coerce=False):
+        data = MONGO_DB[cls.collectionName()].find_one({'object.'+str(field):value})
+        return cls.construct_from_data(data,type_coerce)
         
     
     def delete(self):
