@@ -6,6 +6,7 @@ billiard==2.7.3.17
 celery==3.0.11
 distribute==0.6.24
 django-celery==3.0.11
+gunicorn==0.15.0
 kombu==2.4.7
 pymongo==2.3
 python-dateutil==1.5
