@@ -27,8 +27,9 @@ class User(model.StateObject):
         super(User, self).__init__()
         
     def validate(self):
-        model.Base.validate(self)
+        super(User, self).validate(self)
         
     def enable(self):
         self.change_state('active')
         self.save()
+        

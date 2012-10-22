@@ -58,7 +58,7 @@ class Base(object):
         data["object"] = self.__dict__.copy()
         data["object"].pop('_id', None)
         data["_type"] = self.__class__.__name__
-        data["_version"] = self.version
+        data["_version"] = data["object"].pop("_version", self.version)
         if(self._id): 
             data["_id"] = self._id
         
