@@ -1,6 +1,7 @@
 from server.settings import MONGO_DB
 import bson
 import threading
+import types
 
 def delete_by_id(id, tenant, basecollection):
     ''' Helper function to delete any object simply by ID. Note that this is 
@@ -22,18 +23,18 @@ class Base(object):
         return cls.construct_from_data(data, type_coerce)
     
     @classmethod
-    def construct_from_data(cls,data,type_coerce=False):
+    def construct_from_data(cls, data, type_coerce=False):
         if(not data): return None
         
-        if(data["_type"]!=cls.__name__):
+        if(data["_type"] != cls.__name__):
             # FUTURE NOTE: Potentially look for hierarchy and accept
             raise ModelError("Invalid type being loaded")
         
-        o = cls() # This might change if we accept hierarchy to reflect the class from data
+        o = cls()  # This might change if we accept hierarchy to reflect the class from data
         o._id = data.pop('_id')
         
         # Check the data version and call upgrade
-        if(data["_version"]!=cls.version):
+        if(data["_version"] != cls.version):
             cls.upgrade(data)
         o._version = data.pop("_version")
         o.__dict__.update(data["object"])
@@ -42,15 +43,15 @@ class Base(object):
     
     @classmethod
     def find_by_unique_field(cls, field, value, type_coerce=False):
-        data = MONGO_DB[cls.collectionName()].find_one({'object.'+str(field):value})
-        return cls.construct_from_data(data,type_coerce)
+        data = MONGO_DB[cls.collectionName()].find_one({'object.' + str(field):value})
+        return cls.construct_from_data(data, type_coerce)
         
     
-    def delete(self):
+    def purge(self):
         ''' Hard deletes the object from repository.  We might not really want this'''
         if(not self._id):
             raise ModelError("Can't delete transient object")
-        MONGO_DB[Base.collectionName(self.__class__)].delete({'_id':self._id})
+        MONGO_DB[self.collectionName()].delete({'_id':self._id})
         
 
     def save(self, tenant=None):
@@ -81,7 +82,7 @@ class Base(object):
         # Get the tenant from threading definition
         # All workers must set the tenant name
         # vebsiam middleware sets the tenant name 
-        tenant = threading.local().__dict__.get('tenant',None)
+        tenant = threading.local().__dict__.get('tenant', None)
         if(cls.tenant_aware and not tenant):
             raise ModelError("Tenant is mandatory when model class is tenant aware: " + cls.__name__)
         if(cls.tenant_aware): 
@@ -94,11 +95,25 @@ class StateObject(Base):
         self._state = self.default_state
 
     def change_state(self, newstate):
-        try:
-            self._state = self.states[self._state][newstate]
-        except KeyError:
+        if(newstate in self.states["transitions"][self._state]):
+            self._state = newstate
+        else:
             raise ModelError(str.format("Transition to {1} not allowed from {0}", newstate, self._state))
+        
+    def __getattr__(self, name):
+        if(self.states["operations"].has_key(name)):
+            def stateop(self):
+                if(self._state in self.states["operations"][name]["from"]):
+                    self.change_state(self.states["operations"][name]["to"])
+                else:
+                    raise UnsupportedOperation(str.format("Operation {0} is not allowed in current state {1}", name, self._state))
+            return types.MethodType(stateop, self, StateObject)
+                
 
 class ModelError(Exception):
     def __init__(self, error):
         self.error = error
+
+class UnsupportedOperation(ModelError):
+    def __init__(self, error):
+        super(UnsupportedOperation, self).__init__(error)
