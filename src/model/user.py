@@ -7,7 +7,7 @@ class User(model.StateObject):
     default_state = 'inactive'
     states = {
         'transitions': {
-            'inactive':{ 'active' },
+            'inactive':{ 'active', 'deleted'},
             'active'  :{ 'inactive', 'deleted','locked' },
             'locked'  :{ 'inactive', 'deleted','active' },
             'deleted' :{ 'active', 'removed' }
