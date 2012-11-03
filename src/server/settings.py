@@ -8,6 +8,8 @@ TRUE_VALUES = ("true","t","1","yes")
 SITE_ROOT = os.path.abspath(os.path.join(__file__,'..','..','..'))
 print str.format("Running server from: {0}",SITE_ROOT)
 mongo_db_location = os.environ.get("MONGODB_URL","mongodb://vebsuser:vebsuser@localhost:27017/vebsiam2") 
+mongo_db_location = os.environ.get("MONGOLAB_URI","mongodb://vebsuser:vebsuser@localhost:27017/vebsiam2") 
+
 mongo_db_url = urlparse.urlparse(mongo_db_location)
 MONGO_DB = pymongo.Connection(mongo_db_location)[mongo_db_url.path.strip('/')]
 
