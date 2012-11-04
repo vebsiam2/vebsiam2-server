@@ -5,9 +5,11 @@ argparse==1.2.1
 billiard==2.7.3.17
 celery==3.0.11
 distribute==0.6.24
+dj-database-url==0.2.1
 django-celery==3.0.11
 gunicorn==0.15.0
 kombu==2.4.7
+psycopg2==2.4.5
 pymongo==2.3
 python-dateutil==1.5
 pytz==2012f
