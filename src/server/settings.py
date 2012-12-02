@@ -1,7 +1,10 @@
 # Django settings for server project.
-import os, pymongo, urlparse, dj_database_url
+import os
+import pymongo
+import urlparse
 
 TRUE_VALUES = ("true","t","1","yes")
+PROJECT_DIR = os.path.abspath(os.path.join(__file__,'..','..'))
 
 SITE_ROOT = os.path.abspath(os.path.join(__file__,'..','..','..'))
 print str.format("Running server from: {0}",SITE_ROOT)
@@ -11,7 +14,7 @@ mongo_db_location = os.environ.get("MONGOLAB_URI","mongodb://vebsuser:vebsuser@l
 mongo_db_url = urlparse.urlparse(mongo_db_location)
 MONGO_DB = pymongo.Connection(mongo_db_location)[mongo_db_url.path.strip('/')]
 
-DEBUG =  os.environ.get('DEBUG',"").lower() in TRUE_VALUES
+DEBUG =  os.environ.get('DEBUG',"1").lower() in TRUE_VALUES
 TEMPLATE_DEBUG = os.environ.get('TEMPLATE_DEBUG',"").lower() in TRUE_VALUES
 if(DEBUG):
     print "Warning: Running in debug mode"
@@ -23,7 +26,14 @@ ADMINS = (
 MANAGERS = ADMINS
 
 DATABASES = {
-    'default': dj_database_url.config(default='postgres://localhost/')
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
+        'NAME': os.path.join(SITE_ROOT,'sqlite.db'),  # Or path to database file if using sqlite3.
+        'USER': '',                      # Not used with sqlite3.
+        'PASSWORD': '',                  # Not used with sqlite3.
+        'HOST': '',                      # Set to empty string for localhost. Not used with sqlite3.
+        'PORT': '',                      # Set to empty string for default. Not used with sqlite3.
+    }
 }
 
 # Local time zone for this installation. Choices can be found here:
@@ -112,6 +122,8 @@ TEMPLATE_DIRS = (
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
+    #"C:/vebsprojects/vebsiam2-server/src/ui/templates",
+    os.path.join(PROJECT_DIR,'ui/templates'),
 )
 
 INSTALLED_APPS = (

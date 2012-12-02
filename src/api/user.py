@@ -2,6 +2,7 @@ from django.http import HttpResponse
 from django.conf.urls import url, patterns
 from django.utils import simplejson
 from model.user import User
+from django.template.response import TemplateResponse
 import sys
 
 urlpatterns = patterns('',
@@ -9,6 +10,7 @@ urlpatterns = patterns('',
   url(r'^enable/(\d+)$', 'api.user.enable', name='enable_user'),
   url(r'^detail/([0-9a-f]+)$', 'api.user.detail', name='detail_user'),
   url(r'^fetch', 'api.user.fetch', name='fetch_user'),
+  url(r'^register', 'api.user.register', name='register_user'),
 )
 
 def create(request):
@@ -70,4 +72,27 @@ def fetch(request):
     
     return user_details(u, err)
 
+    
+def register(request):
+    if(request.method != 'POST'):
+        ''' Render the register.html template here ''' 
+        '''return TemplateResponse(request, 'register.html', {'next':request.REQUEST['next']})'''
+        return TemplateResponse(request, 'register.html')
+        '''return HttpResponse("<html><h1>Self Registration Page- GET</h1></html>", status=200)
+        '''
+    '''
+    json_data = simplejson.loads(request.raw_post_data)
+    u = User()
+    for name in json_data:
+        # TODO: Add validation of attribute names and values 
+        u.__dict__[name] = json_data[name]
+    u.save()
+    ret = {
+       'success':True,
+       'id':str(u._id)
+    }'''
+    'return HttpResponse(simplejson.dumps(ret),"application/json")'
+    out=create(request)
+    '''return  HttpResponse("<html><h1>Self Registration Page- POST</h1</html>", status=200)'''
+    return  HttpResponse(out)
     
