@@ -14,9 +14,37 @@ urlpatterns = patterns('',
 )
 
 def create(request):
+    '''
     if(request.method != 'POST'): 
         return HttpResponse("Invalid create request", status=503)
     json_data = simplejson.loads(request.raw_post_data)
+    '''
+    json_data = request.REQUEST  # Getting all the request parameters as json string
+    print json_data 
+    ' Check to see if all params have empty values'    
+    jsondataempty=True
+    for val in json_data.values():
+        if val:
+            jsondataempty=False
+        
+    if jsondataempty:
+        ret = {
+               'success':False,
+               'id':''
+        }
+    else:
+        u = User()
+        for name in json_data:
+            # TODO: Add validation of attribute names and values 
+            u.__dict__[name] = json_data[name]
+        u.save()
+        ret = {
+           'success':True,
+           'id':str(u._id)
+        }
+    return HttpResponse(simplejson.dumps(ret),"application/json")
+
+def createfromjson(json_data):
     u = User()
     for name in json_data:
         # TODO: Add validation of attribute names and values 
@@ -76,23 +104,9 @@ def fetch(request):
 def register(request):
     if(request.method != 'POST'):
         ''' Render the register.html template here ''' 
-        '''return TemplateResponse(request, 'register.html', {'next':request.REQUEST['next']})'''
         return TemplateResponse(request, 'register.html')
         '''return HttpResponse("<html><h1>Self Registration Page- GET</h1></html>", status=200)
         '''
-    '''
-    json_data = simplejson.loads(request.raw_post_data)
-    u = User()
-    for name in json_data:
-        # TODO: Add validation of attribute names and values 
-        u.__dict__[name] = json_data[name]
-    u.save()
-    ret = {
-       'success':True,
-       'id':str(u._id)
-    }'''
-    'return HttpResponse(simplejson.dumps(ret),"application/json")'
     out=create(request)
-    '''return  HttpResponse("<html><h1>Self Registration Page- POST</h1</html>", status=200)'''
     return  HttpResponse(out)
     
