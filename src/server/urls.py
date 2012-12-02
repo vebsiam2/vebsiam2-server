@@ -8,6 +8,7 @@ from server import settings
 
 urlpatterns = patterns('',
     url(r'^user/', include('api.user')),
+    url(r'^auth/', include('api.auth')),
     url(r'^static/(.*)$', 'django.views.static.serve', {'document_root':settings.STATIC_ROOT}),
                        
     # Examples:
