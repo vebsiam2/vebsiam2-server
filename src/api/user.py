@@ -4,6 +4,8 @@ from django.utils import simplejson
 from model.user import User
 from django.template.response import TemplateResponse
 import sys
+import urllib2
+import urllib
 
 urlpatterns = patterns('',
   url(r'^create$', 'api.user.create', name='create_user'),
@@ -12,6 +14,8 @@ urlpatterns = patterns('',
   url(r'^fetch', 'api.user.fetch', name='fetch_user'),
   url(r'^register', 'api.user.register', name='register_user'),
 )
+RECAPTCHA_PRIVATE_KEY = '6LfNpNgSAAAAAEvMbbfkkzrRoXWBxmKW2hmeqWzF'
+RECAPTCHA_VERIFY_URL = 'http://www.google.com/recaptcha/api/verify'
 
 def create(request):
     '''
@@ -30,7 +34,8 @@ def create(request):
     if jsondataempty:
         ret = {
                'success':False,
-               'id':''
+               'id':'',
+               'error':'All input fields are empty'
         }
     else:
         u = User()
@@ -107,6 +112,28 @@ def register(request):
         return TemplateResponse(request, 'register.html')
         '''return HttpResponse("<html><h1>Self Registration Page- GET</h1></html>", status=200)
         '''
-    out=create(request)
-    return  HttpResponse(out)
+    ''' Captcha support '''
+    recaptcha_post_data = [('privatekey',RECAPTCHA_PRIVATE_KEY),
+                 ('challenge',request.POST.get("recaptcha_challenge_field", None)),
+                 ('response',request.POST.get("recaptcha_response_field", None)),
+                 ('remoteip',request.META.get("REMOTE_ADDR", None)),
+                 ]     # a sequence of two element tupless
+    recaptcha_result = urllib2.urlopen(RECAPTCHA_VERIFY_URL, urllib.urlencode(recaptcha_post_data))
+    recaptcha_verify_content = recaptcha_result.read()
+    print recaptcha_verify_content
+    
+    recaptcha_error=True
+    if 'true' in recaptcha_verify_content:
+        recaptcha_error=False
+        
+    
+    if not recaptcha_error:        
+        out=create(request)
+        return  HttpResponse(out)
+    else:
+        ret = {
+               'success': False,
+               'id':'',
+               'error':'Error in validating recaptcha response'}
+        return HttpResponse(simplejson.dumps(ret),"application/json")
     

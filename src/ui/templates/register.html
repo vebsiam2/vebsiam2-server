@@ -52,10 +52,27 @@
 		    <td><input name="gender"></td>
 		  </tr>
 		  <tr>
+		  	<td>reCaptcha -	Prove you're not a robot</td>
+		  	<td>
+			<iframe
+				src="http://www.google.com/recaptcha/api/noscript?k=6LfNpNgSAAAAAOHO92PoBOWPGi8_qvQ0qnbGw-JW"
+				height="300" width="500" frameborder="0"></iframe>
+			</td>
+		</tr>
+		<tr>
+			<td></td>
+		    <td>
+				<textarea name="recaptcha_challenge_field" rows="3" cols="40"></textarea>
+				<input type="hidden" name="recaptcha_response_field" value="manual_challenge" />		
+			</td>
+		</tr>
+		  <tr>
 		    <td></td>
 		    <td><input value="Register" type="submit"></td>
 		  </tr>
 		</table>
+		
+	
 	</form>
 </body>
 </html>
