@@ -8,8 +8,6 @@ urlpatterns = patterns('',
 
 
 def login(request):
-    if(request.method != 'POST'): 
-        return HttpResponse("Invalid login request", status=503)
-    return TemplateResponse(request, 'login.html', {'next':None})
-
-    
+    if(request.method == 'GET'):
+        return TemplateResponse(request, 'login.html', {'next':None}) 
+    return HttpResponse("Invalid login request", status=503)
